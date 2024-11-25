@@ -3,7 +3,6 @@ import CoreMotion
 
 struct HomeView: View {
     @StateObject private var viewModel = PushUpCountViewModel()
-    @State private var airPodsModelName: String = "AirPods Pro (Mock)"
     @State private var animateOpacity: Bool = false
     @State private var homeState: HomeViewState = .notConnected
 
@@ -37,7 +36,7 @@ extension HomeView {
     // 상단 헤더 박스를 구현하는 부분
     private var headerBox: some View {
         HStack {
-            Text(viewModel.isAirPodsConnected ? airPodsModelName : "AirPods 상태")
+            Text(viewModel.isAirPodsConnected ? (viewModel.airPodsModelName ?? "AirPods") : "AirPods 상태")
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding(.leading)
