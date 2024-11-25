@@ -3,10 +3,7 @@ import CoreMotion
 
 struct ContentView: View {
     @StateObject private var viewModel = PushUpCountViewModel()
-    //airpods 모델은 mock data로 대체
     @State private var airPodsModelName: String = "AirPods Pro (Mock)"
-    // @State private var isAirPodsConnected: Bool = false
-    // @State private var animateOpacity: Bool = false
     @State private var selectedTab: Tab = .home
     
     enum Tab: String, CaseIterable {

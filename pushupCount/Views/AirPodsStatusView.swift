@@ -1,5 +1,6 @@
 import SwiftUI
 
+//TOBE Deprecated
 struct AirPodsStatusView: View {
     @Binding var isAirPodsConnected: Bool
     @Binding var airPodsModelName: String

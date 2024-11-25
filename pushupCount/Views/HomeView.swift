@@ -3,7 +3,6 @@ import CoreMotion
 
 struct HomeView: View {
     @StateObject private var viewModel = PushUpCountViewModel()
-    @State private var airPodsModelName: String = "AirPods Pro (Mock)"
     @State private var animateOpacity: Bool = false
     @State private var homeState: HomeViewState = .notConnected
 
@@ -14,25 +13,12 @@ struct HomeView: View {
     }
 
     var body: some View {
-        VStack {
-            switch homeState {
-            case .notConnected:
-                notConnectedView
-            case .connected:
-                connectedView
-                    .onAppear {
-                        withAnimation(Animation.easeIn(duration: 2.0)) {
-                            // 일정 시간 후에 readyForCount 상태로 전환
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                homeState = .readyForCount
-                            }
-                        }
-                    }
-            case .readyForCount:
-                readyForCountView
-            }
+        VStack(spacing: 10) { // 간격을 줄이기 위해 spacing을 10으로 설정
+            headerBox
+            mainContentView
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGray6)) // 배경색을 추가하여 전체적인 톤을 부드럽게 만듭니다.
         .onAppear {
             viewModel.startSession()
         }
@@ -42,13 +28,83 @@ struct HomeView: View {
     }
 }
 
+// MARK: - Subviews
+extension HomeView {
+    // 상단 헤더 박스를 구현하는 부분
+    private var headerBox: some View {
+        HStack {
+            Text(viewModel.isAirPodsConnected ? (viewModel.airPodsModelName ?? "AirPods") : "AirPods 상태")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.leading)
+
+            Spacer()
+
+            // AirPods 탐색 버튼
+            Button(action: {
+                if !viewModel.isAirPodsConnected {
+                    viewModel.startPlaybackToPromptAirPodsConnection() // 오디오 재생을 통해 연결 유도
+                }
+                checkAirPodsConnection()
+            }) {
+                HStack {
+                    Image(systemName: viewModel.isAirPodsConnected ? "checkmark.circle" : "antenna.radiowaves.left.and.right")
+                    Text(viewModel.isAirPodsConnected ? "Connected" : "Connect")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(viewModel.isAirPodsConnected ? Color.green : Color.blue)
+                .cornerRadius(25) // 둥근 모서리
+                .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
+            }
+            .padding()
+            .disabled(viewModel.isAirPodsConnected) // AirPods가 연결되면 버튼 비활성화
+        }
+        .padding()
+        .background(Color.white) // 헤더 박스를 하얀색 배경으로 설정
+        .cornerRadius(20) // 모서리 라운드를 주어서 박스 형태로 만듦
+        .shadow(radius: 5) // 그림자를 추가하여 깊이감을 부여
+        .padding()
+    }
+
+    // 메인 콘텐츠 부분 - 상태에 따라 보여주는 콘텐츠가 달라집니다.
+    private var mainContentView: some View {
+        VStack {
+            switch homeState {
+            case .notConnected:
+                notConnectedView
+            case .connected:
+                connectedView
+                    .onAppear {
+                        withAnimation(Animation.easeIn(duration: 2.0)) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                homeState = .readyForCount
+                            }
+                        }
+                    }
+            case .readyForCount:
+                readyForCountAndTimerView
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.top)
+        .onReceive(viewModel.$isAirPodsConnected) { isConnected in
+            homeState = isConnected ? .connected : .notConnected
+        }
+    }
+}
+
+// MARK: - States and Subviews for Different States
 extension HomeView {
     // AirPods가 연결되지 않았을 때 보여주는 뷰
     private var notConnectedView: some View {
         VStack {
-            Text("AirPods가 연결되지 않았습니다.")
-                .font(.title)
-                .foregroundColor(.red)
+            Text("AirPods을 착용 후 운동해주세요.")
+                .font(.title3)
+                .foregroundColor(.gray)
                 .padding()
             Image(systemName: "airpodspro")
                 .resizable()
@@ -60,31 +116,16 @@ extension HomeView {
                         animateOpacity = true
                     }
                 }
-            
-            // AirPods 탐색 버튼 추가
-            Button(action: {
-                checkAirPodsConnection()
-            }) {
-                Text("AirPods 탐색하기")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 5)
     }
 
-    // AirPods가 연결된 후 보여주는 뷰 (애니메이션 혹은 모델명)
+    // AirPods가 연결된 후 보여주는 뷰
     private var connectedView: some View {
         VStack {
-            Text("AirPods가 연결되었습니다: \(airPodsModelName)")
-                .font(.title)
-                .foregroundColor(.green)
-                .padding()
-
-            // AirPods 이미지 보여주기 (예: 모델의 3D 이미지나 실감나는 이미지)
             Image("airpods_4_large_2x") // 이미지 이름 수정
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -97,19 +138,38 @@ extension HomeView {
                     }
                 }
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 5)
     }
-
-    // Push-Up 카운트가 가능한 상태에서 보여주는 뷰
-    private var readyForCountView: some View {
-        VStack {
-            if let motionData = viewModel.motionData {
-                PushUpCountView(pushUpCount: viewModel.pushUpCount, motionData: motionData)
-            } else {
-                Text("모션 데이터를 가져오는 중...")
-                    .font(.subheadline)
-                    .padding()
+    
+    // Push-Up 카운트와 타이머가 동시에 가능한 상태에서 보여주는 뷰
+    private var readyForCountAndTimerView: some View {
+        VStack(spacing: 20) {
+            VStack {
+                if let motionData = viewModel.motionData {
+                    PushUpCountView(pushUpCount: viewModel.pushUpCount, motionData: motionData)
+                } else {
+                    Text("모션 데이터를 가져오는 중...")
+                        .font(.subheadline)
+                        .padding()
+                }
             }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(radius: 5)
+
+            VStack {
+                ExploreView()
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(radius: 5)
         }
+        .padding()
     }
 
     // AirPods 연결 여부 확인 및 상태 업데이트
