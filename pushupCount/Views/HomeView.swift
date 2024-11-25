@@ -15,6 +15,66 @@ struct HomeView: View {
 
     var body: some View {
         VStack {
+            headerBox
+
+            Spacer()
+
+            mainContentView
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGray6)) // 배경색을 추가하여 전체적인 톤을 부드럽게 만듭니다.
+        .onAppear {
+            viewModel.startSession()
+        }
+        .onDisappear {
+            viewModel.stopSession()
+        }
+    }
+}
+
+// MARK: - Subviews
+extension HomeView {
+    // 상단 헤더 박스를 구현하는 부분
+    private var headerBox: some View {
+        VStack {
+            HStack {
+                Text(viewModel.isAirPodsConnected ? airPodsModelName : "AirPods 상태")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.leading)
+
+                Spacer()
+
+                // AirPods 탐색 버튼
+                Button(action: {
+                    checkAirPodsConnection()
+                }) {
+                    HStack {
+                        Image(systemName: viewModel.isAirPodsConnected ? "checkmark.circle" : "antenna.radiowaves.left.and.right")
+                        Text(viewModel.isAirPodsConnected ? "Connected" : "Connect")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(viewModel.isAirPodsConnected ? Color.green : Color.blue)
+                    .cornerRadius(25) // 둥근 모서리
+                    .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
+                }
+                .padding()
+            }
+            .padding()
+        }
+        .background(Color.white) // 헤더 박스를 하얀색 배경으로 설정
+        .cornerRadius(20) // 모서리 라운드를 주어서 박스 형태로 만듦
+        .shadow(radius: 5) // 그림자를 추가하여 깊이감을 부여
+        .padding() // 전체 화면에 여백 추가
+    }
+
+    // 메인 콘텐츠 부분 - 상태에 따라 보여주는 콘텐츠가 달라집니다.
+    private var mainContentView: some View {
+        VStack {
             switch homeState {
             case .notConnected:
                 notConnectedView
@@ -33,22 +93,18 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            viewModel.startSession()
-        }
-        .onDisappear {
-            viewModel.stopSession()
-        }
+        .padding(.top)
     }
 }
 
+// MARK: - States and Subviews for Different States
 extension HomeView {
     // AirPods가 연결되지 않았을 때 보여주는 뷰
     private var notConnectedView: some View {
         VStack {
-            Text("AirPods가 연결되지 않았습니다.")
-                .font(.title)
-                .foregroundColor(.red)
+            Text("AirPods을 착용 후 운동해주세요.")
+                .font(.title3)
+                .foregroundColor(.gray)
                 .padding()
             Image(systemName: "airpodspro")
                 .resizable()
@@ -60,31 +116,12 @@ extension HomeView {
                         animateOpacity = true
                     }
                 }
-            
-            // AirPods 탐색 버튼 추가
-            Button(action: {
-                checkAirPodsConnection()
-            }) {
-                Text("AirPods 탐색하기")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
         }
     }
 
-    // AirPods가 연결된 후 보여주는 뷰 (애니메이션 혹은 모델명)
+    // AirPods가 연결된 후 보여주는 뷰
     private var connectedView: some View {
         VStack {
-            Text("AirPods가 연결되었습니다: \(airPodsModelName)")
-                .font(.title)
-                .foregroundColor(.green)
-                .padding()
-
-            // AirPods 이미지 보여주기 (예: 모델의 3D 이미지나 실감나는 이미지)
             Image("airpods_4_large_2x") // 이미지 이름 수정
                 .resizable()
                 .aspectRatio(contentMode: .fit)
