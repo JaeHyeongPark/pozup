@@ -11,7 +11,7 @@ class PushUpCountViewModel: ObservableObject {
 
     private var audioSessionManager = AudioSessionManager()
     private var motionManager = HeadphoneMotionManager()
-    private var audioPlayer: AVPlayer? 
+    private var audioPlayer: AVPlayer?
 
     init() {
         audioSessionManager.$isAirPodsConnected

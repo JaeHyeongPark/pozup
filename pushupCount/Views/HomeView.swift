@@ -13,11 +13,8 @@ struct HomeView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 10) { // 간격을 줄이기 위해 spacing을 10으로 설정
             headerBox
-
-            Spacer()
-
             mainContentView
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -70,7 +67,7 @@ extension HomeView {
         .background(Color.white) // 헤더 박스를 하얀색 배경으로 설정
         .cornerRadius(20) // 모서리 라운드를 주어서 박스 형태로 만듦
         .shadow(radius: 5) // 그림자를 추가하여 깊이감을 부여
-        .padding() // 전체 화면에 여백 추가
+        .padding()
     }
 
     // 메인 콘텐츠 부분 - 상태에 따라 보여주는 콘텐츠가 달라집니다.
@@ -83,14 +80,13 @@ extension HomeView {
                 connectedView
                     .onAppear {
                         withAnimation(Animation.easeIn(duration: 2.0)) {
-                            // 일정 시간 후에 readyForCount 상태로 전환
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                 homeState = .readyForCount
                             }
                         }
                     }
             case .readyForCount:
-                readyForCountView
+                readyForCountAndTimerView
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -121,6 +117,10 @@ extension HomeView {
                     }
                 }
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 5)
     }
 
     // AirPods가 연결된 후 보여주는 뷰
@@ -138,19 +138,38 @@ extension HomeView {
                     }
                 }
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 5)
     }
-
-    // Push-Up 카운트가 가능한 상태에서 보여주는 뷰
-    private var readyForCountView: some View {
-        VStack {
-            if let motionData = viewModel.motionData {
-                PushUpCountView(pushUpCount: viewModel.pushUpCount, motionData: motionData)
-            } else {
-                Text("모션 데이터를 가져오는 중...")
-                    .font(.subheadline)
-                    .padding()
+    
+    // Push-Up 카운트와 타이머가 동시에 가능한 상태에서 보여주는 뷰
+    private var readyForCountAndTimerView: some View {
+        VStack(spacing: 20) {
+            VStack {
+                if let motionData = viewModel.motionData {
+                    PushUpCountView(pushUpCount: viewModel.pushUpCount, motionData: motionData)
+                } else {
+                    Text("모션 데이터를 가져오는 중...")
+                        .font(.subheadline)
+                        .padding()
+                }
             }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(radius: 5)
+
+            VStack {
+                ExploreView()
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(radius: 5)
         }
+        .padding()
     }
 
     // AirPods 연결 여부 확인 및 상태 업데이트
