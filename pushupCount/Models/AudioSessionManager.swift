@@ -3,6 +3,8 @@ import Combine
 
 class AudioSessionManager: ObservableObject {
     @Published var isAirPodsConnected: Bool = false
+    @Published var airPodsModelName: String?
+
     private var audioSession = AVAudioSession.sharedInstance()
     
     init() {
@@ -22,11 +24,17 @@ class AudioSessionManager: ObservableObject {
     }
 
     private func checkAirPodsConnection() {
-        isAirPodsConnected = audioSession.currentRoute.outputs.contains { output in
-            output.portType == .bluetoothA2DP ||
-            output.portType == .bluetoothLE ||
-            output.portType == .bluetoothHFP &&
-            output.portName.contains("AirPods")
+        if let output = audioSession.currentRoute.outputs.first(where: { 
+            $0.portType == .bluetoothA2DP ||
+            $0.portType == .bluetoothLE ||
+            $0.portType == .bluetoothHFP &&
+            $0.portName.contains("AirPods")
+        }) {
+            isAirPodsConnected = true
+            airPodsModelName = output.portName // AirPods 모델명을 저장
+        } else {
+            isAirPodsConnected = false
+            airPodsModelName = nil
         }
     }
 }

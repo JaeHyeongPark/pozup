@@ -36,36 +36,34 @@ struct HomeView: View {
 extension HomeView {
     // 상단 헤더 박스를 구현하는 부분
     private var headerBox: some View {
-        VStack {
-            HStack {
-                Text(viewModel.isAirPodsConnected ? airPodsModelName : "AirPods 상태")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .padding(.leading)
+        HStack {
+            Text(viewModel.isAirPodsConnected ? airPodsModelName : "AirPods 상태")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.leading)
 
-                Spacer()
+            Spacer()
 
-                // AirPods 탐색 버튼
-                Button(action: {
-                    checkAirPodsConnection()
-                }) {
-                    HStack {
-                        Image(systemName: viewModel.isAirPodsConnected ? "checkmark.circle" : "antenna.radiowaves.left.and.right")
-                        Text(viewModel.isAirPodsConnected ? "Connected" : "Connect")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(viewModel.isAirPodsConnected ? Color.green : Color.blue)
-                    .cornerRadius(25) // 둥근 모서리
-                    .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
+            // AirPods 탐색 버튼
+            Button(action: {
+                checkAirPodsConnection()
+            }) {
+                HStack {
+                    Image(systemName: viewModel.isAirPodsConnected ? "checkmark.circle" : "antenna.radiowaves.left.and.right")
+                    Text(viewModel.isAirPodsConnected ? "Connected" : "Connect")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                 }
-                .padding()
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(viewModel.isAirPodsConnected ? Color.green : Color.blue)
+                .cornerRadius(25) // 둥근 모서리
+                .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
             }
             .padding()
         }
+        .padding()
         .background(Color.white) // 헤더 박스를 하얀색 배경으로 설정
         .cornerRadius(20) // 모서리 라운드를 주어서 박스 형태로 만듦
         .shadow(radius: 5) // 그림자를 추가하여 깊이감을 부여
@@ -94,6 +92,9 @@ extension HomeView {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top)
+        .onReceive(viewModel.$isAirPodsConnected) { isConnected in
+            homeState = isConnected ? .connected : .notConnected
+        }
     }
 }
 
