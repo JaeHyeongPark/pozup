@@ -35,10 +35,6 @@ struct ExploreView: View {
             VStack {
                 Text(model.secondsToCompletion.asTimestamp)
                     .font(.largeTitle)
-//                HStack {
-//                    Image(systemName: "bell.fill")
-//                    Text(model.completionDate, format: .dateTime.hour().minute())
-//                }
             }
         }
         .frame(width: 250, height: 255)

@@ -45,6 +45,9 @@ extension HomeView {
 
             // AirPods 탐색 버튼
             Button(action: {
+                if !viewModel.isAirPodsConnected {
+                    viewModel.startPlaybackToPromptAirPodsConnection() // 오디오 재생을 통해 연결 유도
+                }
                 checkAirPodsConnection()
             }) {
                 HStack {
@@ -61,6 +64,7 @@ extension HomeView {
                 .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
             }
             .padding()
+            .disabled(viewModel.isAirPodsConnected) // AirPods가 연결되면 버튼 비활성화
         }
         .padding()
         .background(Color.white) // 헤더 박스를 하얀색 배경으로 설정

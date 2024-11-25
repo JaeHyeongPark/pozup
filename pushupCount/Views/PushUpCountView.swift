@@ -7,9 +7,9 @@ struct PushUpCountView: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
-            DataRowView(label: "Roll", value: motionData.attitude.roll)
-            DataRowView(label: "Pitch", value: motionData.attitude.pitch)
-            DataRowView(label: "Yaw", value: motionData.attitude.yaw)
+            // DataRowView(label: "Roll", value: motionData.attitude.roll)
+            // DataRowView(label: "Pitch", value: motionData.attitude.pitch)
+            // DataRowView(label: "Yaw", value: motionData.attitude.yaw)
 
             Text("Push-Up Count: \(pushUpCount)")
                 .font(.largeTitle)
